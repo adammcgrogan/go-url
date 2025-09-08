@@ -1,0 +1,6 @@
+# Ignore Docker-related files
+/db_data/
+/pgadmin_data/
+
+# Ignore Go environment variables and credentials
+.env
