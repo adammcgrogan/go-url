@@ -64,6 +64,45 @@ func createUrl(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func listUrls(w http.ResponseWriter, r *http.Request) {
+
+	var urls []map[string]string
+
+	rows, err := db.Query("SELECT short_code, original_url, created_at FROM urls ORDER BY created_at DESC")
+
+	if err != nil {
+		http.Error(w, "Database query error", http.StatusInternalServerError)
+		log.Printf("Database query error: %v", err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var shortCode, originalUrl string
+		var createdAt time.Time
+		if err := rows.Scan(&shortCode, &originalUrl, &createdAt); err != nil {
+			http.Error(w, "Database scan error", http.StatusInternalServerError)
+			log.Printf("Database scan error: %v", err)
+			return
+		}
+
+		formattedTime := createdAt.Format("2006-01-02 15:04:05")
+
+		urlEntry := map[string]string{
+			"short_code":   shortCode,
+			"original_url": originalUrl,
+			"created_at":   formattedTime,
+		}
+		urls = append(urls, urlEntry)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(urls); err != nil {
+		http.Error(w, "JSON encoding error", http.StatusInternalServerError)
+	}
+
+}
+
 func handleRedirect(w http.ResponseWriter, r *http.Request) {
 
 	shortCode := chi.URLParam(r, "shortCode")
@@ -113,6 +152,7 @@ func main() {
 
 	r.Post("/shorten", createUrl)
 	r.Get("/{shortCode:[a-zA-Z0-9]+}", handleRedirect)
+	r.Get("/urls", listUrls)
 
 	fs := http.FileServer(http.Dir("./static"))
 	r.Handle("/*", fs)
