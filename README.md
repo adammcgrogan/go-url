@@ -15,7 +15,7 @@ A simple web application built with Go to shorten long URLs. This project was cr
 Prerequisites: Go, Docker
 
 Instructions:
-1. Clone the repository: `git clone https://github.com/adammcgrogan/go-notes.git`, `cd go-notes`.
+1. Clone the repository: `git clone https://github.com/adammcgrogan/go-notes.git`, `cd go-url`.
 2. Set up the database: `docker-compose up -d`
 3. Run the application: `go run .`
 4. Open `http://localhost:8080` in your browser.
